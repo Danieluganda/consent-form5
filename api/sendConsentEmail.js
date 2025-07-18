@@ -1,11 +1,9 @@
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).send("Method Not Allowed");
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
     return;
   }
 
@@ -17,39 +15,71 @@ export default async function handler(req, res) {
     witnessAddress,
     witnessDate,
     userSignature,
-    witnessSignature,
+    witnessSignature
   } = req.body;
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  const mailOptions = {
-    from: `"Consent Forms" <${process.env.EMAIL_USER}>`,
-    to: process.env.DESTINATION_EMAIL,
-    subject: `New Consent Form Submission by ${userName}`,
-    html: `
-      <h3>Consent Form Submission</h3>
-      <p><b>Name:</b> ${userName}</p>
-      <p><b>Address:</b> ${userAddress}</p>
-      <p><b>Date:</b> ${userDate}</p>
-      <p><b>Witness Name:</b> ${witnessName}</p>
-      <p><b>Witness Address:</b> ${witnessAddress}</p>
-      <p><b>Witness Date:</b> ${witnessDate}</p>
-      <p><b>User Signature:</b><br><img src="${userSignature}" width="300" /></p>
-      <p><b>Witness Signature:</b><br><img src="${witnessSignature}" width="300" /></p>
-    `,
-  };
-
   try {
+    // Create PDF
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([600, 700]);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    page.drawText(`Consent Form Submission`, {
+      x: 50,
+      y: 650,
+      size: 18,
+      font,
+      color: rgb(0, 0, 0),
+    });
+
+    const lines = [
+      `Name: ${userName}`,
+      `Address: ${userAddress}`,
+      `Date: ${userDate}`,
+      `Witness Name: ${witnessName}`,
+      `Witness Address: ${witnessAddress}`,
+      `Witness Date: ${witnessDate}`
+    ];
+
+    lines.forEach((text, idx) => {
+      page.drawText(text, {
+        x: 50,
+        y: 620 - idx * 30,
+        size: 12,
+        font,
+        color: rgb(0, 0, 0),
+      });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+
+    // Send email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"Consent Forms" <${process.env.EMAIL_USER}>`,
+      to: 'destination-email@example.com',
+      subject: `Consent Form Submission - ${userName}`,
+      text: 'Please find attached the consent form PDF.',
+      attachments: [
+        {
+          filename: 'ConsentForm.pdf',
+          content: Buffer.from(pdfBytes),
+          contentType: 'application/pdf'
+        }
+      ]
+    };
+
     await transporter.sendMail(mailOptions);
-    res.status(200).send("Email sent!");
+    res.status(200).send('Email with PDF sent!');
   } catch (error) {
-    console.error("Error sending email:", error);
-    res.status(500).send("Error sending email");
+    console.error('Error:', error);
+    res.status(500).send('Failed to send email with PDF.');
   }
 }
