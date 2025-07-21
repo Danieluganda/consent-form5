@@ -2,7 +2,10 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
+  console.log("📩 API HIT: /api/sendConsentEmail");
+
   if (req.method !== 'POST') {
+    console.warn("⚠️ Method Not Allowed:", req.method);
     res.status(405).send('Method Not Allowed');
     return;
   }
@@ -18,8 +21,17 @@ export default async function handler(req, res) {
     witnessSignature
   } = req.body;
 
+  console.log("📝 Received Form Data:", {
+    userName,
+    userAddress,
+    userDate,
+    witnessName,
+    witnessAddress,
+    witnessDate
+  });
+
   try {
-    // Create PDF
+    // PDF creation
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 700]);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -52,8 +64,9 @@ export default async function handler(req, res) {
     });
 
     const pdfBytes = await pdfDoc.save();
+    console.log("📄 PDF created successfully");
 
-    // Send email
+    // Email setup
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -64,7 +77,7 @@ export default async function handler(req, res) {
 
     const mailOptions = {
       from: `"Consent Forms" <${process.env.EMAIL_USER}>`,
-      to: 'destination-email@example.com',
+      to: 'destination-email@example.com', // Replace or pass dynamically
       subject: `Consent Form Submission - ${userName}`,
       text: 'Please find attached the consent form PDF.',
       attachments: [
@@ -76,10 +89,13 @@ export default async function handler(req, res) {
       ]
     };
 
+    console.log("📬 Sending email to:", mailOptions.to);
     await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully");
+
     res.status(200).send('Email with PDF sent!');
   } catch (error) {
-    console.error('Error:', error);
+    console.error("❌ Error occurred:", error);
     res.status(500).send('Failed to send email with PDF.');
   }
 }

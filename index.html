@@ -321,55 +321,58 @@
 <p>The undersigned  signatory executing this authorization certifies that he/she has authority to  act on behalf of the Company.</p>
 <p>&nbsp;</p>
 
-    <form id="signForm" style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
-      <!-- User section -->
-      <div style="margin-bottom: 20px;">
-        <label>Name:</label>
-        <input type="text" name="userName" required />
-        
-        <label>Signature:</label>
-        <canvas id="userSign"></canvas>
-        <button type="button" onclick="clearCanvas('userSign')">Clear Signature</button>
-        
-        <label>Address:</label>
-        <input type="text" name="userAddress" required />
-        
-        <label>Date:</label>
-        <input type="date" name="userDate" required />
-      </div>
+  <form id="signForm" style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
+  <!-- User section -->
+  <div style="margin-bottom: 30px;">
+    <h3>User</h3>
 
-      <!-- Witness section -->
-      <div style="border-top: 1px solid #ddd; padding-top: 20px;">
-        <p style="font-weight: bold; font-size: 16px; margin-bottom: 16px;">In the presence of:</p>
-        
-        <label>Name:</label>
-        <input type="text" name="witnessName" required />
-        
-        <label>Signature:</label>
-        <canvas id="witnessSign"></canvas>
-        <button type="button" onclick="clearCanvas('witnessSign')">Clear Signature</button>
-        
-        <label>Address:</label>
-        <input type="text" name="witnessAddress" required />
-        
-        <label>Date:</label>
-        <input type="date" name="witnessDate" required />
-      </div>
-<button style="position:fixed;top:10px;right:10px;z-index:9999;background:red;color:white;">Test Button</button>
+    <label>Name:</label><br />
+    <input type="text" name="userName" required style="width: 100%; margin-bottom: 10px;" />
 
-      <button type="submit">Submit Form</button>
-    </form>
+    <label>Signature:</label><br />
+    <canvas id="userSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
+    <button type="button" onclick="clearCanvas('userSign')" style="margin: 10px 0;">Clear Signature</button><br />
+
+    <label>Address:</label><br />
+    <input type="text" name="userAddress" required style="width: 100%; margin-bottom: 10px;" />
+
+    <label>Date:</label><br />
+    <input type="date" name="userDate" required style="width: 100%;" />
+  </div>
+
+  <!-- Witness section -->
+  <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+    <h3>Witness</h3>
+
+    <label>Name:</label><br />
+    <input type="text" name="witnessName" required style="width: 100%; margin-bottom: 10px;" />
+
+    <label>Signature:</label><br />
+    <canvas id="witnessSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
+    <button type="button" onclick="clearCanvas('witnessSign')" style="margin: 10px 0;">Clear Signature</button><br />
+
+    <label>Address:</label><br />
+    <input type="text" name="witnessAddress" required style="width: 100%; margin-bottom: 10px;" />
+
+    <label>Date:</label><br />
+    <input type="date" name="witnessDate" required style="width: 100%;" />
+  </div>
+
+  <!-- Submit -->
+  <div style="margin-top: 30px; text-align: center;">
+    <button type="submit" style="padding: 10px 20px; font-size: 16px;">Submit Form</button>
+    <p id="statusMessage" style="margin-top: 15px; color: #555;"></p>
+  </div>
+</form>
+
   </div>
 </div>
-
 <script>
-  // Setup signature pads for user and witness
   function setupSignaturePad(canvasId) {
     const canvas = document.getElementById(canvasId);
     const ctx = canvas.getContext('2d');
     let drawing = false;
 
-    // Resize canvas to match CSS size for clarity
     function resize() {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * window.devicePixelRatio;
@@ -380,26 +383,21 @@
       ctx.lineWidth = 2;
       clearCanvas(canvasId);
     }
+
     resize();
     window.addEventListener('resize', resize);
 
     function getXY(e) {
       const rect = canvas.getBoundingClientRect();
-      let clientX, clientY;
-      if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
+      let clientX = e.touches?.[0]?.clientX ?? e.clientX;
+      let clientY = e.touches?.[0]?.clientY ?? e.clientY;
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function startDrawing(e) {
       e.preventDefault();
       drawing = true;
-      const {x, y} = getXY(e);
+      const { x, y } = getXY(e);
       ctx.beginPath();
       ctx.moveTo(x, y);
     }
@@ -407,7 +405,7 @@
     function draw(e) {
       if (!drawing) return;
       e.preventDefault();
-      const {x, y} = getXY(e);
+      const { x, y } = getXY(e);
       ctx.lineTo(x, y);
       ctx.stroke();
     }
@@ -436,42 +434,51 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Initialize signature pads
+  // Init
   setupSignaturePad('userSign');
   setupSignaturePad('witnessSign');
 
-  // Handle form submit
-  document.getElementById('signForm').addEventListener('submit', function(e) {
+  // Submit handler
+  document.getElementById('signForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const form = e.target;
-    const formData = new FormData(form);
+    const userSignature = document.getElementById('userSign').toDataURL('image/png');
+    const witnessSignature = document.getElementById('witnessSign').toDataURL('image/png');
 
-    // Extract signature images as base64 PNG strings
-    const userCanvas = document.getElementById('userSign');
-    const witnessCanvas = document.getElementById('witnessSign');
+    const payload = {
+      userName: form.userName.value,
+      userAddress: form.userAddress.value,
+      userDate: form.userDate.value,
+      witnessName: form.witnessName.value,
+      witnessAddress: form.witnessAddress.value,
+      witnessDate: form.witnessDate.value,
+      userSignature,
+      witnessSignature
+    };
 
-    const userSignature = userCanvas.toDataURL('image/png');
-    const witnessSignature = witnessCanvas.toDataURL('image/png');
+    console.log("📤 Sending Payload:", payload);
 
-    formData.append('userSignature', userSignature);
-    formData.append('witnessSignature', witnessSignature);
+    try {
+      const res = await fetch('/api/sendConsentEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
 
-    // Example: log all data to console
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+      if (res.ok) {
+        alert("✅ Consent form submitted and emailed successfully!");
+      } else {
+        const errorText = await res.text();
+        console.error("❌ Server error:", errorText);
+        alert("❌ Failed to send form. Check console for details.");
+      }
+    } catch (err) {
+      console.error("❌ Network or JS error:", err);
+      alert("❌ Failed to send form due to network or script error.");
     }
-
-    // TODO: Send formData to server, e.g.:
-    /*
-    fetch('/submit-form', {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => alert('Form submitted successfully!'))
-    .catch(err => alert('Error submitting form'));
-    */
   });
 </script>
 </body>
