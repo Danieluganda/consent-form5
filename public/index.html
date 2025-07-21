@@ -434,12 +434,12 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Init signature pads
+  // Initialize signature pads
   setupSignaturePad('userSign');
   setupSignaturePad('witnessSign');
 
-  // Submit handler
-  document.getElementById('signForm').addEventListener('submit', async function(e) {
+  // Handle form submission
+  document.getElementById('signForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const form = e.target;
@@ -477,22 +477,23 @@
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
+
       const a = document.createElement("a");
       a.href = url;
       a.download = "ConsentForm.pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
+
       window.URL.revokeObjectURL(url);
-
       alert("✅ PDF generated and downloaded!");
-
     } catch (err) {
       console.error("❌ Network error:", err);
       alert("❌ Failed to generate PDF due to a network error.");
     }
   });
 </script>
+
 
 </body>
 </html>

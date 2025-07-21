@@ -14,7 +14,9 @@ export default async function handler(req, res) {
     userDate,
     witnessName,
     witnessAddress,
-    witnessDate
+    witnessDate,
+    userSignature,
+    witnessSignature
   } = req.body;
 
   console.log("📝 Received Form Data:", {
@@ -23,7 +25,9 @@ export default async function handler(req, res) {
     userDate,
     witnessName,
     witnessAddress,
-    witnessDate
+    witnessDate,
+    hasUserSign: !!userSignature,
+    hasWitnessSign: !!witnessSignature,
   });
 
   try {
@@ -57,6 +61,31 @@ export default async function handler(req, res) {
         color: rgb(0, 0, 0),
       });
     });
+
+    // Handle Signatures
+    if (userSignature) {
+      const userSigImageBytes = Buffer.from(userSignature.split(',')[1], 'base64');
+      const userSigImage = await pdfDoc.embedPng(userSigImageBytes);
+      page.drawImage(userSigImage, {
+        x: 50,
+        y: 350,
+        width: 100,
+        height: 50,
+      });
+      page.drawText('User Signature', { x: 50, y: 410, size: 10, font });
+    }
+
+    if (witnessSignature) {
+      const witnessSigImageBytes = Buffer.from(witnessSignature.split(',')[1], 'base64');
+      const witnessSigImage = await pdfDoc.embedPng(witnessSigImageBytes);
+      page.drawImage(witnessSigImage, {
+        x: 300,
+        y: 350,
+        width: 100,
+        height: 50,
+      });
+      page.drawText('Witness Signature', { x: 300, y: 410, size: 10, font });
+    }
 
     const pdfBytes = await pdfDoc.save();
 
