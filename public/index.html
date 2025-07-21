@@ -434,7 +434,7 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Init
+  // Init signature pads
   setupSignaturePad('userSign');
   setupSignaturePad('witnessSign');
 
@@ -468,18 +468,31 @@
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        alert("✅ Consent form submitted and emailed successfully!");
-      } else {
+      if (!res.ok) {
         const errorText = await res.text();
         console.error("❌ Server error:", errorText);
-        alert("❌ Failed to send form. Check console for details.");
+        alert("❌ Failed to generate PDF. Check console.");
+        return;
       }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ConsentForm.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      alert("✅ PDF generated and downloaded!");
+
     } catch (err) {
-      console.error("❌ Network or JS error:", err);
-      alert("❌ Failed to send form due to network or script error.");
+      console.error("❌ Network error:", err);
+      alert("❌ Failed to generate PDF due to a network error.");
     }
   });
 </script>
+
 </body>
 </html>
