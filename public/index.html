@@ -1,593 +1,438 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Consent Form with Signatures</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+  <meta charset="UTF-8">
+  <title>10X Consent Form</title>
   <style>
     @page {
       size: A4;
       margin: 20mm;
     }
 
-    html,
     body {
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       padding: 0;
-      background: #f0f0f0;
-      font-family: 'Arial', sans-serif;
-      color: #222;
+      margin: 0;
+      display: flex;
+      justify-content: center;
     }
 
-    .container {
-      width: 210mm;
-      margin: auto;
+    .a4-container {
       background: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-    }
-
-    .page {
       width: 210mm;
       min-height: 297mm;
+      padding: 20mm 25mm;
       box-sizing: border-box;
-      padding: 20mm;
-      background: white;
-      page-break-after: always;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      color: #333;
     }
 
-    .page:last-child {
-      page-break-after: auto;
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
     }
 
-    header {
+    .logo-bar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 15px;
+    }
+
+    .logo-bar img {
+      max-height: 60px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 20px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-top: 20px;
       border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      padding-bottom: 4px;
     }
 
-    .logo {
-      height: 25mm;
-      width: auto;
+    h4 {
+      margin-top: 20px;
+      font-size: 16px;
     }
 
-    h1,
-    h2,
-    h3 {
-      margin: 1.2em 0 0.6em;
-      font-size: 16pt;
+    .section {
+      margin-bottom: 16px;
     }
 
-    p {
-      line-height: 1.5;
-      font-size: 11pt;
-      margin: 0.5em 0;
+    .checkbox-list {
+      list-style: none;
+      padding-left: 0;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1em;
-      font-size: 10pt;
+    .checkbox-list li {
+      margin: 6px 0;
     }
 
-    th,
-    td {
-      padding: 6px 8px;
-      border: 1px solid #ccc;
-      vertical-align: top;
-    }
-
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-      text-align: left;
-    }
-
-    tr:nth-child(even) td {
-      background-color: #fafafa;
+    .declaration {
+      margin-top: 25px;
+      line-height: 1.6;
     }
 
     .signature-block {
+      margin-top: 30px;
+    }
+
+    .signature-line {
+      margin-top: 20px;
       display: flex;
       justify-content: space-between;
-      margin-top: 2em;
-      font-size: 10pt;
-      flex-wrap: wrap;
       gap: 20px;
     }
 
-    .signature-box {
-      flex: 1 1 48%;
-      display: flex;
-      flex-direction: column;
+    .signature-line div {
+      width: 45%;
     }
 
-    .label {
-      font-weight: bold;
-      margin-top: 1em;
+    .page-break {
+      page-break-before: always;
+      margin-top: 40px;
     }
 
-    .checkbox-cell {
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .form-field {
-      display: inline-block;
+    input[type="text"] {
+      border: none;
       border-bottom: 1px solid #000;
-      width: 100%;
-      height: 1.2em;
-      margin-top: 0.3em;
+      margin-left: 8px;
     }
 
-    .content {
-      page-break-inside: avoid;
-    }
-
-    input[type="text"],
-    input[type="date"] {
-      width: 100%;
-      border: none;
-      border-bottom: 1.5px solid #333;
-      padding: 4px;
-      font-size: 14px;
-      outline: none;
-      background: transparent;
-      box-sizing: border-box;
-    }
-
-    canvas {
-      border-bottom: 1.5px solid #666;
-      touch-action: none;
-      width: 100%;
-      height: 100px;
-      display: block;
-    }
-
-    button {
-      margin-top: 4px;
-      padding: 6px 12px;
-      background: #ddd;
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    button[type="submit"] {
-      background: #0078d4;
-      color: white;
-      font-weight: bold;
-      margin-top: 20px;
-      width: 100%;
+    @media print {
+      body {
+        background: white;
+      }
+      .a4-container {
+        box-shadow: none;
+      }
     }
   </style>
-
 </head>
-
 <body>
-  <div id="pdf-content">
-    <div class="container">
-      <div class="page">
-        <header>
+
+  <div class="a4-container">
+    <div class="header">
+      <div class="logo-bar">
+       
           <img src="assets/logos/outbox_logo.svg" alt="Right Logo" class="logo" />
           <img src="assets/logos/uncdf_logo.png" alt="Left Logo" class="logo" />
           <img src="assets/logos/foundation_logo.png" alt="Right Logo" class="logo" />
-        </header>
-
-        <h1 style="text-align:center;">10X: ENABLING GROWTH OF MSMEs THROUGH THE DIGITAL ECONOMY PROGRAM</h1>
-        <h2 style="text-align:center; text-decoration: underline;">Consent to Collection, Processing and Transfer of
-          Personal and Enterprise Level Data</h2>
-
-        <!-- (Put the rest of your consent text here) -->
-
-        <p align="center"><strong>10X: ENABLING GROWTH OF MSMEs THROUGH THE DIGITAL ECONOMY PROGRAM</strong></p>
-        <p align="center"><strong><u>Consent to Collection, Processing and Transfer of Personal and Enterprise Level
-              Data</u></strong><strong><u> </u></strong></p>
-        <p><a name="_gjdgxs" id="_gjdgxs"></a>Outbox (U) Limited (&lsquo;&lsquo;we&rsquo;&rsquo;, or
-          &lsquo;&lsquo;us&rsquo;&rsquo; is committed to improving its programs and ensuring that they have a positive
-          impact on program participants. To achieve this, we collect and analyse or avail for analysis data about or
-          relating to our program partners and sub-partners. At the same time, we value your privacy, and we are
-          committed to protecting your personal and commercial information. This consent form explains how we will
-          collect, use, store, process, share and transfer information related to your company (&lsquo;&lsquo;enterprise
-          level data&rsquo;&rsquo;), employees and other individuals (&lsquo;&lsquo;personal data&rsquo;&rsquo;)
-          affiliated with or working for your company in connection with the Program (collectively, the
-          &lsquo;&lsquo;Data&rsquo;&rsquo;). </p>
-        <p>The Data which is the subject of this consent form is that which we are required to collect, process and or
-          disclose to us, Mastercard Foundation and other third parties as part of the Program as described below. </p>
-        <p><strong>Program Name:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10X: Enabling growth of MSMEs
-          through the digital economy&nbsp; </p>
-        <p><strong>Data Collector</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Outbox (U) Limited of
-          3rd Floor, Kalooli Lwanga Tower, Plot 83 &amp; 85, Ntinda Road Kampala, Uganda &ndash; +256 (0)&nbsp;392 000
-          152; <a href="mailto:info@outbox.africa">info@outbox.africa</a> &nbsp; </p>
-        <p>&nbsp;</p>
-        <ol>
-          <li>The purpose of collection and processing </li>
-        </ol>
-        <p>We process your Data to make analysis on the progress of the Program and improve the Program and learn from
-          the data you have collected, including monitoring and evaluating the effectiveness of the Program and to learn
-          how to improve it for future participants. </p>
-        <ol>
-          <li>What data do we process? </li>
-        </ol>
-        <p>&nbsp;</p>
-        <p>We may call upon you to submit to us for processing and or third party disclosure some or all of the
-          following Data, in so far as it relates to your participation in the Program as our partner / supplier: </p>
-        <form>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 40px;">No.</th>
-                <th>Category of Data</th>
-                <th style="width: 130px;">Indicate whichever applies*</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1.</td>
-                <td>Name of company / enterprise</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="company_name" /></td>
-              </tr>
-              <tr>
-                <td>2.</td>
-                <td>Enterprise contact information i.e., location, physical and email addresses, telephone numbers, etc.
-                </td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="contact_info" /></td>
-              </tr>
-              <tr>
-                <td>3.</td>
-                <td>Category of enterprise (whether micro, small, medium or large enterprise)</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="enterprise_category" /></td>
-              </tr>
-              <tr>
-                <td>4.</td>
-                <td>Names, addresses, dates of birth, age, gender, contact information, passport / National ID numbers
-                  of your shareholders and directors</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="shareholders_directors" /></td>
-              </tr>
-              <tr>
-                <td>5.</td>
-                <td>Names, addresses, dates of birth, age, gender and contact information, passport / National ID
-                  numbers etc. of employees and consultants you have assigned to the Program</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="employees_assigned" /></td>
-              </tr>
-              <tr>
-                <td>6.</td>
-                <td>Contact information of sub-partners engaged by the enterprise</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="subpartners_contact" /></td>
-              </tr>
-              <tr>
-                <td>7.</td>
-                <td>Names, addresses, dates of birth, age, gender and contact information of employees and consultants
-                  of sub-partners</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="subpartner_employees" /></td>
-              </tr>
-              <tr>
-                <td>8.</td>
-                <td>Information related to Program participants, including contact information, age, addresses,
-                  identification numbers, number of youth in work, refugees, internally displaced persons, etc.</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="participants_info" /></td>
-              </tr>
-              <tr>
-                <td>9.</td>
-                <td>Financial information i.e., bank account details, tax identification number etc.</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="financial_info" /></td>
-              </tr>
-              <tr>
-                <td>10.</td>
-                <td>Other business, technical, market, financial and commercial information of the enterprise</td>
-                <td class="checkbox-cell"><input type="checkbox" name="data[]" value="other_info" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </form>
-
-        <p> <em>*Tick as appropriate</em></p>
-        <ol>
-          <li>What is the legal basis for processing the Data? </li>
-        </ol>
-        <p>&nbsp;</p>
-        <p>We process your Data within the framework of the applicable legislation, and taking into full account your
-          commercial interests and the fundamental rights of the data subjects, being those of your employees involved
-          in delivering the Program on your behalf.</p>
-        <p>&nbsp;</p>
-        <ol>
-          <li>Who will the Data be shared with?</li>
-        </ol>
-        <p>&nbsp;</p>
-        <p>We may share the Data with following parties, for the purposes indicated:</p>
-        <table border="1" cellspacing="0" cellpadding="0">
-          <tr>
-            <td width="38" valign="top">
-              <p><strong>No.</strong></p>
-            </td>
-            <td width="162" valign="top">
-              <p><strong>Name of organisation </strong></p>
-            </td>
-            <td width="151" valign="top">
-              <p><strong>Address and contact details of organisation </strong></p>
-            </td>
-            <td width="230" valign="top">
-              <p><strong>Purpose of disclosure </strong></p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>1.</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Mastercard Foundation </p>
-            </td>
-            <td width="151" valign="top">
-              <p>Mastercard Foundation Office (Twed Heights &ndash; Muwafu Road), Kampala </p>
-            </td>
-            <td width="230" valign="top">
-              <p>Monitor compliance with Program requirements by partner organisations</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>2.</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Vanguard Research and Advisory Services Limited </p>
-            </td>
-            <td width="151" valign="top">
-              <p>Ssuuna II Road, Ntinda, Kampala</p>
-            </td>
-            <td width="230" valign="top">
-              <p>Undertake Program impact monitoring and evaluation works </p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>3.</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Deloitte Canada</p>
-            </td>
-            <td width="151" valign="top">
-              <p>Toronto, Canada</p>
-            </td>
-            <td width="230" valign="top">
-              <p>Ingest, store and process the data at the direction of the Foundation </p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>4.</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Our professional advisors</p>
-            </td>
-            <td width="151" valign="top">
-              <p>Varied, depending on the institution</p>
-            </td>
-            <td width="230" valign="top">
-              <p>Seeking legal, audit and other advice in relation to the Program</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>&nbsp;</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Government authorities</p>
-            </td>
-            <td width="151" valign="top">
-              <p>Varied, depending on&nbsp; requesting institution </p>
-            </td>
-            <td width="230" valign="top">
-              <p>Compliance with legal requirements and obligations</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="38" valign="top">
-              <p>5.</p>
-            </td>
-            <td width="162" valign="top">
-              <p>Other <em>(please specify)</em></p>
-            </td>
-            <td width="151" valign="top">
-              <p>&nbsp;</p>
-            </td>
-            <td width="230" valign="top">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-        </table>
-        <ol>
-          <li>Your rights </li>
-        </ol>
-        <p>&nbsp;</p>
-        <p>You have the following rights regarding the Data:</p>
-        <ol>
-          <li><strong>Right of access</strong>: You have the right to request a copy of the Data we hold about your
-            enterprise and or your employees.</li>
-          <li><strong>Right to rectification</strong>: You have the right to ask us to correct any inaccuracies in the
-            Data we hold.</li>
-          <li><strong>Right to erasure</strong>: You have the right to ask us to delete any aspect of the Data.</li>
-          <li><strong>Right to restriction of processing</strong>: You have the right to ask us to restrict the
-            processing of the Data.</li>
-          <li><strong>Right to object to processing</strong>: You have the right to object to the processing of the
-            Data.</li>
-          <li><strong>Right to data portability</strong>. You have the right to request that the Data be transferred to
-            another organisation.</li>
-          <li><strong>Right to withdraw consent</strong>. You have the right to withdraw your consent to share the Data
-            at any time. Should any of your employees wish to withdraw your consent, please by sending an email to <a
-              href="mailto:zulu@outbox.africa">zulu@outbox.africa</a> or calling us at +256 (0)&nbsp;392 000 152. </li>
-        </ol>
-        <p>&nbsp;</p>
-        <ol>
-          <li>Your declarations</li>
-        </ol>
-        <p>This consent is freely given with full understanding of the purpose of data collection, processing and
-          transfer.</p>
-        <ol>
-          <li>No compensation will be due to us or our employees / consultants involved with the Program for the
-            disclosure and or transfer of the Data.</li>
-        </ol>
-        <p>&nbsp;</p>
-        <ol>
-          <li>We warrant and represent that all aspects of the Data which may be used to identify a natural person was
-            collected, held, processed, disclosed and transfer authorized by us in accordance with applicable legal
-            requirements.</li>
-        </ol>
-        <ol>
-          <li>We agree to release and hold harmless all the entities to whom the Data will be disclosed from any claims,
-            damages or expenses resulting from the use of the Data for the purposes of the Program.</li>
-        </ol>
-        <p>&nbsp;</p>
-        <ol>
-          <li>All the rights, protections and permissions we have granted in terms of this release letter shall continue
-            for as long as the Program requirements so stipulate.</li>
-        </ol>
-        <ol>
-          <li>If you have any questions or wish to exercise your rights, please contact us using the contact details
-            provided above.</li>
-        </ol>
-        <p>&nbsp;</p>
-        <p>The undersigned signatory executing this authorization certifies that he/she has authority to act on behalf
-          of the Company.</p>
-        <p>&nbsp;</p>
-
-<form id="signForm" style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
-    <!-- User section -->
-    <div style="margin-bottom: 30px;">
-      <h3>User</h3>
-      <label>Name:</label><br />
-      <input type="text" name="userName" required style="width: 100%; margin-bottom: 10px;" />
-
-      <label>Signature:</label><br />
-      <canvas id="userSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
-      <button type="button" onclick="clearCanvas('userSign')" style="margin: 10px 0;">Clear Signature</button><br />
-
-      <label>Address:</label><br />
-      <input type="text" name="userAddress" required style="width: 100%; margin-bottom: 10px;" />
-
-      <label>Date:</label><br />
-      <input type="date" name="userDate" required style="width: 100%;" />
-    </div>
-
-    <!-- Witness section -->
-    <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
-      <h3>Witness</h3>
-
-      <label>Name:</label><br />
-      <input type="text" name="witnessName" required style="width: 100%; margin-bottom: 10px;" />
-
-      <label>Signature:</label><br />
-      <canvas id="witnessSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
-      <button type="button" onclick="clearCanvas('witnessSign')" style="margin: 10px 0;">Clear Signature</button><br />
-
-      <label>Address:</label><br />
-      <input type="text" name="witnessAddress" required style="width: 100%; margin-bottom: 10px;" />
-
-      <label>Date:</label><br />
-      <input type="date" name="witnessDate" required style="width: 100%;" />
-    </div>
-
-    <!-- Submit -->
-    <div style="margin-top: 30px; text-align: center;">
-      <button type="submit" style="padding: 10px 20px; font-size: 16px;">Submit Form</button>
-      <p id="statusMessage" style="margin-top: 15px; color: #555;"></p>
-    </div>
-  </form>
-
-
-
       </div>
+      <h1>10X: Enabling Growth of MSMEs Through the Digital Economy</h1>
+      <h2>Consent to Collection, Processing and Transfer of Personal Data</h2>
     </div>
+
+    <div class="section">
+      <p>
+      Outbox (U) Limited (“we,” or “us”) is committed to improving its programs and ensuring that they have a positive impact on program participants. To achieve this, we collect and analyse or avail for analysis data about program participants. At the same time, we value your privacy and we are committed to protecting your personal information. This consent form explains how we collect, use, store, process and share your personal information as part of “10X: Enabling growth of MSMEs through the digital economy” program (the ‘Program’). 
+      Please read this form carefully and sign to indicate your consent to us to handle your personal information as indicated below.
+      </p>
+    </div>
+
+    <div class="section">
+      <h4>Program Name:</h4>
+      <p>10X: Enabling growth of MSMEs through the digital economy</p>
+
+      <h4>Data Collector:</h4>
+      <p>Outbox (U) Limited, Kalooli Lwanga Tower, Plot 83 & 85, Ntinda Road Kampala, Uganda</p>
+    </div>
+
+    <div class="section">
+      <h4>1. The Purpose of Collection and Processing</h4>
+      <p>
+        We collect your personal data to make analysis on the progress of the Program and improve the Program...
+      </p>
+    </div>
+
+    <div class="section">
+      <h4>2. What Data Do We Collect?</h4>
+      <p>Please tick what applies:</p>
+      <ul class="checkbox-list">
+        <li><label><input type="checkbox"> Name, age (date of birth), and gender</label></li>
+        <li><label><input type="checkbox"> Contact details (phone number, email address, etc.)</label></li>
+        <li><label><input type="checkbox"> National ID / Passport / Refugee ID / Driver’s licence</label></li>
+        <li><label><input type="checkbox"> Employment history and level of education</label></li>
+        <li><label><input type="checkbox"> Participation details in the Program</label></li>
+        <li><label><input type="checkbox"> Marital status</label></li>
+        <li><label><input type="checkbox"> Refugee or displaced person status</label></li>
+        <li><label><input type="checkbox"> Presence of a disability</label></li>
+        <li><label><input type="checkbox"> Feedback and survey responses</label></li>
+        <li><label><input type="checkbox"> Financial information (TIN, bank details, etc.)</label></li>
+        <li><label><input type="checkbox"> Other (specify): <input type="text" /></label></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h4>3. Legal Basis for Collection and Processing</h4>
+      <p>We collect and process your personal data within the framework of the applicable legislation...</p>
+    </div>
+
+    <div class="page-break"></div>
+
+<div class="section" style="padding: 20px 40px; font-family: Arial, sans-serif;">
+  <h4 style="margin-bottom: 10px; font-size: 18px; color: #333;">4. Who Will Your Data Be Shared With?</h4>
+  <p style="font-size: 14px; line-height: 1.5; color: #333;">
+    We may share your data with the following parties, for the purposes indicated:
+  </p>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; border: 1px solid #ccc;">
+    <thead style="background-color: #f5f5f5;">
+      <tr>
+        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">No.</th>
+        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Name of Organisation</th>
+        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Address and Contact Details</th>
+        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Purpose of Disclosure</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 10px;">1</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Mastercard Foundation</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Mastercard Foundation Office (Twed Heights - Muwafu Road), Kampala</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Monitor compliance with Program requirements by partner organisations</td>
+      </tr>
+      <tr style="background-color: #fafafa;">
+        <td style="border: 1px solid #ccc; padding: 10px;">2</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Vanguard Research and Advisory Services Limited</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Ssuuna II Road, Ntinda, Kampala</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Undertake Program impact monitoring and evaluation works</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 10px;">3</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Deloitte Canada</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Toronto, Canada</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Ingest, store and process the data at the direction of the Foundation</td>
+      </tr>
+      <tr style="background-color: #fafafa;">
+        <td style="border: 1px solid #ccc; padding: 10px;">4</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Deloitte Uganda Limited or any of its affiliates</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Rwenzori House, Lumumba Avenue, Nakasero, Kampala</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Due diligence, payments administration, KYC compliance, training and mentorship</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 10px;">5</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Our professional advisors</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Varied, depending on the institution</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Seeking legal, audit and other advice in relation to the Program</td>
+      </tr>
+      <tr style="background-color: #fafafa;">
+        <td style="border: 1px solid #ccc; padding: 10px;">6</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Government authorities</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Varied, depending on requesting institution</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Compliance with legal requirements and obligations</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 10px;">7</td>
+        <td style="border: 1px solid #ccc; padding: 10px;">Other (please specify)</td>
+        <td style="border: 1px solid #ccc; padding: 10px;"></td>
+        <td style="border: 1px solid #ccc; padding: 10px;"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="section" style="padding: 20px 40px; font-family: Arial, sans-serif;">
+  <h4 style="font-size: 18px; color: #333;">5. Your Rights</h4>
+  <p style="font-size: 14px; line-height: 1.6; color: #333;">
+    You are under no obligation to give your consent. You are eligible to participate in all aspects of the Program, regardless of your decision to share your data. Consent to data sharing is entirely separate from Program participation. You have the following rights regarding your personal data:
+  </p>
+  <ul style="padding-left: 20px; font-size: 14px; line-height: 1.6; color: #333;">
+    <li><strong>(a) Right of access:</strong> You have the right to request a copy of the information we hold about you.</li>
+    <li><strong>(b) Right to rectification:</strong> You have the right to ask us to correct any inaccurate information we hold about you.</li>
+    <li><strong>(c) Right to erasure:</strong> You have the right to ask us to delete your information.</li>
+    <li><strong>(d) Right to restriction of processing:</strong> You have the right to ask us to restrict the processing of your information.</li>
+    <li><strong>(e) Right to object to processing:</strong> You have the right to object to the processing of your information.</li>
+    <li><strong>(f) Right to data portability:</strong> You have the right to request that your data be transferred to another organisation.</li>
+    <li><strong>(g) Right to withdraw consent:</strong> You have the right to withdraw your consent to share your data at any time. This will not affect your ability to participate in or continue participating in the Program. Should you wish to withdraw your consent, please send an email to <a href="mailto:zulu@outbox.africa" style="color: #0056b3;">zulu@outbox.africa</a> or call <strong>+256 (0) 392 000 152</strong>.</li>
+  </ul>
+</div>
+
+<div class="section declaration" style="padding: 20px 40px; font-family: Arial, sans-serif;">
+  <h4 style="font-size: 18px; color: #333; margin-bottom: 10px;">6. Your Declarations</h4>
+  <p style="font-size: 14px; line-height: 1.6; color: #333;">
+    This consent is given of my own free will, with full understanding of the purpose of data collection, use, processing and transfer and acknowledgement of my rights relating to my personal data.
+  </p>
+  <ol style="font-size: 14px; line-height: 1.6; color: #333; padding-left: 20px;">
+    <li>
+      I recognise that the data collector may require additional information from me which, even if not stipulated above, is deemed relevant for the purposes stated herein.
+    </li>
+    <li>
+      I recognise that no compensation will be due to me in the event I consent to the collection, use, processing, disclosure and or transfer of my personal data.
+    </li>
+    <li>
+      I acknowledge that I have been informed of, and have fully understood the reasons why the data collector is required to disclose my personal data to Mastercard Foundation and the third parties indicated herein, as well as the legal basis for doing so.
+    </li>
+    <li>
+      If you have any questions or wish to exercise your rights, please contact us using any of the contact details provided above.
+    </li>
+  </ol>
+</div>
+
+
+<div class="signature-block" style="padding: 40px 20px; font-family: Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; margin: auto;">
+
+  <!-- Participant Section -->
+  <div style="margin-bottom: 50px;">
+    <h4 style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">Participant Details</h4>
+
+    <label for="participantName" style="display: block; margin: 10px 0 4px;">Full Name</label>
+    <input type="text" id="participantName" name="participantName" placeholder="Enter full name"
+           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+
+    <label style="display: block; margin: 20px 0 5px;">Signature</label>
+    <canvas id="participantSignature" width="450" height="100"
+            style="border: 1px dashed #aaa; border-radius: 4px; background-color: #fff;"></canvas>
+    <button type="button" onclick="clearSignature('participantSignature')"
+            style="margin-top: 8px; padding: 6px 12px; background-color: #999; color: #fff; border: none; border-radius: 4px;">Clear Signature</button>
+
+    <label for="participantDate" style="display: block; margin: 20px 0 4px;">Date</label>
+    <input type="date" id="participantDate" name="participantDate"
+           style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
   </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Witness Section -->
+  <div>
+    <h4 style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">Witness Details</h4>
+
+    <label for="witnessName" style="display: block; margin: 10px 0 4px;">Full Name</label>
+    <input type="text" id="witnessName" name="witnessName" placeholder="Enter full name"
+           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+
+    <label style="display: block; margin: 20px 0 5px;">Signature</label>
+    <canvas id="witnessSignature" width="450" height="100"
+            style="border: 1px dashed #aaa; border-radius: 4px; background-color: #fff;"></canvas>
+    <button type="button" onclick="clearSignature('witnessSignature')"
+            style="margin-top: 8px; padding: 6px 12px; background-color: #999; color: #fff; border: none; border-radius: 4px;">Clear Signature</button>
+
+    <label for="witnessDate" style="display: block; margin: 20px 0 4px;">Date</label>
+    <input type="date" id="witnessDate" name="witnessDate"
+           style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+  </div>
+
+  <!-- Submit Button -->
+
+
+
+<div style="text-align: center; margin-top: 40px;">
+  <button onclick="submitConsentForm()" style="background-color: #008CBA; color: white; padding: 12px 30px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer;">
+    Submit Consent Form
+  </button>
+</div>
+
+
+
+
+
+</div>
+
+
+  </div>
 <script>
-  // Clear canvas
-  function clearCanvas(canvasId) {
+  function clearSignature(canvasId) {
     const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Enable drawing with mouse
-  function enableSignatureDrawing(canvasId) {
+  function setupSignaturePad(canvasId) {
     const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     let drawing = false;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-
-    canvas.addEventListener('mousedown', () => drawing = true);
-    canvas.addEventListener('mouseup', () => {
+    canvas.addEventListener("mousedown", () => drawing = true);
+    canvas.addEventListener("mouseup", () => {
       drawing = false;
       ctx.beginPath();
     });
-    canvas.addEventListener('mousemove', (e) => {
+    canvas.addEventListener("mouseout", () => drawing = false);
+    canvas.addEventListener("mousemove", draw);
+
+    canvas.addEventListener("touchstart", () => drawing = true);
+    canvas.addEventListener("touchend", () => {
+      drawing = false;
+      ctx.beginPath();
+    });
+    canvas.addEventListener("touchcancel", () => drawing = false);
+    canvas.addEventListener("touchmove", drawTouch);
+
+    function draw(e) {
       if (!drawing) return;
       const rect = canvas.getBoundingClientRect();
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
+    }
+
+    function drawTouch(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    }
   }
 
-  // Initialize both signature canvases
-  enableSignatureDrawing('userSign');
-  enableSignatureDrawing('witnessSign');
+  function getSignatureDataURL(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    return canvas.toDataURL("image/png");
+  }
 
-  // Submit button logic: generates PDF and sends to backend
-  document.getElementById('sendEmailBtn').addEventListener('click', async () => {
-    const element = document.getElementById('pdf-content');
-    const opt = {
-      margin: 0.5,
-      filename: 'ConsentForm.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, allowTaint: false }, // allowTaint: false to avoid taint error
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  function submitConsentForm() {
+    const participantName = document.getElementById('participantName').value.trim();
+    const participantDate = document.getElementById('participantDate').value;
+    const witnessName = document.getElementById('witnessName').value.trim();
+    const witnessDate = document.getElementById('witnessDate').value;
+
+    const participantSignature = getSignatureDataURL('participantSignature');
+    const witnessSignature = getSignatureDataURL('witnessSignature');
+
+    // TODO: Send or generate PDF with this data
+    const formData = {
+      participantName,
+      participantDate,
+      participantSignature,
+      witnessName,
+      witnessDate,
+      witnessSignature
     };
 
-    try {
-      const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+    console.log("📝 Consent Form Data:", formData);
 
-      const formData = new FormData();
-      formData.append('pdf', pdfBlob, 'ConsentForm.pdf');
+    alert("Consent form captured successfully. Ready for PDF generation.");
 
-      const res = await fetch('/api/sendConsentEmail', {
-        method: 'POST',
-        body: formData
-      });
+    // You can now pass `formData` to your PDF generator or API call
+    // Example: generatePdf(formData) or sendToBackend(formData)
+  }
 
-      const text = await res.text();
-      alert("✅ Submission successful: " + text);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to submit: " + err.message);
-    }
-  });
-
-  // Optional: Download button (still works)
-  document.getElementById('downloadBtn').addEventListener('click', async () => {
-    const element = document.getElementById('pdf-content');
-    const opt = {
-      margin: 0.5,
-      filename: 'ConsentForm.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, allowTaint: false },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    await html2pdf().set(opt).from(element).save();
-  });
+  // Initialize on load
+  window.onload = function () {
+    setupSignaturePad('participantSignature');
+    setupSignaturePad('witnessSignature');
+  };
 </script>
 
 
-</body>
 
+</body>
 </html>
