@@ -1,101 +1,46 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import formidable from 'formidable';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import FormData from 'form-data';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(req, res) {
-  console.log("📩 API HIT: /api/sendConsentEmail");
+  if (req.method !== 'POST') return res.status(405).send("Method Not Allowed");
 
-  if (req.method !== 'POST') {
-    console.warn("⚠️ Method Not Allowed:", req.method);
-    return res.status(405).send('Method Not Allowed');
-  }
+  const form = new formidable.IncomingForm({ keepExtensions: true });
 
-  const {
-    userName,
-    userAddress,
-    userDate,
-    witnessName,
-    witnessAddress,
-    witnessDate,
-    userSignature,
-    witnessSignature
-  } = req.body;
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error("❌ Form parsing error:", err);
+      return res.status(500).send("Form parsing failed");
+    }
 
-  console.log("📝 Received Form Data:", {
-    userName,
-    userAddress,
-    userDate,
-    witnessName,
-    witnessAddress,
-    witnessDate,
-    hasUserSign: !!userSignature,
-    hasWitnessSign: !!witnessSignature,
+    const file = files.pdf;
+    if (!file) {
+      return res.status(400).send("No PDF file uploaded");
+    }
+
+    const driveForm = new FormData();
+    driveForm.append('file', fs.createReadStream(file.filepath));
+    driveForm.append('filename', file.originalFilename || 'ConsentForm.pdf');
+
+    try {
+      const driveRes = await fetch('https://script.google.com/macros/s/AKfycbzaXScfliiZSZxh0h_co_i4fCjYW7rmvTBdfYYygFz0F2KL8QXCEJC6GKak_vSpWte1bA/exec', {
+        method: 'POST',
+        body: driveForm,
+      });
+
+      const text = await driveRes.text();
+      console.log("✅ Drive response:", text);
+      return res.status(200).send("✅ Consent form sent to Drive.");
+    } catch (err) {
+      console.error("❌ Error uploading to Drive:", err);
+      return res.status(500).send("Drive upload failed.");
+    }
   });
-
-  try {
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([600, 700]);
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-    page.drawText(`Consent Form Submission`, {
-      x: 50,
-      y: 650,
-      size: 18,
-      font,
-      color: rgb(0, 0, 0),
-    });
-
-    const lines = [
-      `Name: ${userName}`,
-      `Address: ${userAddress}`,
-      `Date: ${userDate}`,
-      `Witness Name: ${witnessName}`,
-      `Witness Address: ${witnessAddress}`,
-      `Witness Date: ${witnessDate}`
-    ];
-
-    lines.forEach((text, idx) => {
-      page.drawText(text, {
-        x: 50,
-        y: 620 - idx * 30,
-        size: 12,
-        font,
-        color: rgb(0, 0, 0),
-      });
-    });
-
-    // Handle Signatures
-    if (userSignature) {
-      const userSigImageBytes = Buffer.from(userSignature.split(',')[1], 'base64');
-      const userSigImage = await pdfDoc.embedPng(userSigImageBytes);
-      page.drawImage(userSigImage, {
-        x: 50,
-        y: 350,
-        width: 100,
-        height: 50,
-      });
-      page.drawText('User Signature', { x: 50, y: 410, size: 10, font });
-    }
-
-    if (witnessSignature) {
-      const witnessSigImageBytes = Buffer.from(witnessSignature.split(',')[1], 'base64');
-      const witnessSigImage = await pdfDoc.embedPng(witnessSigImageBytes);
-      page.drawImage(witnessSigImage, {
-        x: 300,
-        y: 350,
-        width: 100,
-        height: 50,
-      });
-      page.drawText('Witness Signature', { x: 300, y: 410, size: 10, font });
-    }
-
-    const pdfBytes = await pdfDoc.save();
-
-    console.log("📄 PDF created successfully");
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=ConsentForm.pdf');
-    return res.status(200).send(Buffer.from(pdfBytes));
-  } catch (error) {
-    console.error("❌ Error generating PDF:", error);
-    return res.status(500).send('Failed to generate PDF');
-  }
 }

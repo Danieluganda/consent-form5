@@ -1,34 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
+  <title>Consent Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Consent Form with Signatures</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Arial&display=swap" rel="stylesheet">
   <style>
     @page {
       size: A4;
       margin: 20mm;
     }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f0f0f0;
-      font-family: 'Arial', sans-serif;
-      color: #222;
+    html, body {
+      margin: 0; padding: 0; background: #eee; font-family: Arial, sans-serif;
     }
-
     .container {
       width: 210mm;
       margin: auto;
       background: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      padding: 0;
     }
-
     .page {
       width: 210mm;
       min-height: 297mm;
@@ -37,150 +28,61 @@
       background: white;
       page-break-after: always;
     }
-
     .page:last-child {
       page-break-after: auto;
     }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+    h1 {
+      font-size: 18pt;
+      margin-bottom: 10px;
     }
-
-    .logo {
-      height: 25mm;
-      width: auto;
+    .form-section {
+      margin-top: 20px;
     }
-
-    h1,
-    h2,
-    h3 {
-      margin: 1.2em 0 0.6em;
-      font-size: 16pt;
-    }
-
-    p {
-      line-height: 1.5;
-      font-size: 11pt;
-      margin: 0.5em 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1em;
-      font-size: 10pt;
-    }
-
-    th,
-    td {
-      padding: 6px 8px;
-      border: 1px solid #ccc;
-      vertical-align: top;
-    }
-
-    th {
-      background-color: #f2f2f2;
+    label {
       font-weight: bold;
-      text-align: left;
+      display: block;
+      margin-top: 15px;
     }
-
-    tr:nth-child(even) td {
-      background-color: #fafafa;
-    }
-
-    .signature-block {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2em;
-      font-size: 10pt;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .signature-box {
-      flex: 1 1 48%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .label {
-      font-weight: bold;
-      margin-top: 1em;
-    }
-
-    .checkbox-cell {
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .form-field {
-      display: inline-block;
-      border-bottom: 1px solid #000;
-      width: 100%;
-      height: 1.2em;
-      margin-top: 0.3em;
-    }
-
-    .content {
-      page-break-inside: avoid;
-    }
-
-    input[type="text"],
-    input[type="date"] {
+    input[type="text"], input[type="date"] {
       width: 100%;
       border: none;
       border-bottom: 1.5px solid #333;
-      padding: 4px;
+      padding: 5px;
       font-size: 14px;
-      outline: none;
-      background: transparent;
       box-sizing: border-box;
     }
-
     canvas {
-      border-bottom: 1.5px solid #666;
-      touch-action: none;
+      border: 1px solid #aaa;
       width: 100%;
       height: 100px;
-      display: block;
+      margin-top: 10px;
     }
-
+    .button-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 30px 0;
+    }
     button {
-      margin-top: 4px;
-      padding: 6px 12px;
-      background: #ddd;
-      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
       cursor: pointer;
-      font-size: 13px;
     }
-
-    button[type="submit"] {
+    button.primary {
       background: #0078d4;
       color: white;
-      font-weight: bold;
-      margin-top: 20px;
-      width: 100%;
+      border: none;
+    }
+    button.secondary {
+      background: #f2f2f2;
+      border: 1px solid #ccc;
     }
   </style>
-
 </head>
-
 <body>
-  <div id="pdf-content">
-    <div class="container">
-      <div class="page">
-        <header>
-          <img src="assets/logos/outbox_logo.svg" alt="Right Logo" class="logo" />
-          <img src="assets/logos/uncdf_logo.png" alt="Left Logo" class="logo" />
-          <img src="assets/logos/foundation_logo.png" alt="Right Logo" class="logo" />
-        </header>
-
-        <h1 style="text-align:center;">10X: ENABLING GROWTH OF MSMEs THROUGH THE DIGITAL ECONOMY PROGRAM</h1>
+  <div class="container" id="pdfContent">
+    <div class="page">
+<h1 style="text-align:center;">10X: ENABLING GROWTH OF MSMEs THROUGH THE DIGITAL ECONOMY PROGRAM</h1>
         <h2 style="text-align:center; text-decoration: underline;">Consent to Collection, Processing and Transfer of
           Personal and Enterprise Level Data</h2>
 
@@ -455,165 +357,51 @@
         <p>The undersigned signatory executing this authorization certifies that he/she has authority to act on behalf
           of the Company.</p>
         <p>&nbsp;</p>
-
-        <form id="signForm" style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
-          <!-- User section -->
-          <div style="margin-bottom: 30px;">
-            <h3>User</h3>
-
-            <label>Name:</label><br />
-            <input type="text" name="userName" required style="width: 100%; margin-bottom: 10px;" />
-
-            <label>Signature:</label><br />
-            <canvas id="userSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
-            <button type="button" onclick="clearCanvas('userSign')" style="margin: 10px 0;">Clear
-              Signature</button><br />
-
-            <label>Address:</label><br />
-            <input type="text" name="userAddress" required style="width: 100%; margin-bottom: 10px;" />
-
-            <label>Date:</label><br />
-            <input type="date" name="userDate" required style="width: 100%;" />
-          </div>
-
-          <!-- Witness section -->
-          <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
-            <h3>Witness</h3>
-
-            <label>Name:</label><br />
-            <input type="text" name="witnessName" required style="width: 100%; margin-bottom: 10px;" />
-
-            <label>Signature:</label><br />
-            <canvas id="witnessSign" style="border: 1px solid #ccc; width: 100%; height: 120px;"></canvas><br />
-            <button type="button" onclick="clearCanvas('witnessSign')" style="margin: 10px 0;">Clear
-              Signature</button><br />
-
-            <label>Address:</label><br />
-            <input type="text" name="witnessAddress" required style="width: 100%; margin-bottom: 10px;" />
-
-            <label>Date:</label><br />
-            <input type="date" name="witnessDate" required style="width: 100%;" />
-          </div>
-
-          <!-- Submit -->
-          <div style="margin-top: 30px; text-align: center;">
-            <button type="submit" style="padding: 10px 20px; font-size: 16px;">Submit Form</button>
-            <p id="statusMessage" style="margin-top: 15px; color: #555;"></p>
-          </div>
-        </form>
-
-
-        <button id="downloadBtn">Download as PDF</button>
-        <button id="sendEmailBtn">Send via Email</button>
-
-
-
-      </div>
     </div>
+    <!-- Add more .page blocks as needed -->
   </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<script>
-  // Clear canvas
-  function clearCanvas(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  <div class="button-row">
+    <button class="primary" onclick="downloadPDF()">Download as PDF</button>
+    <button class="secondary" onclick="sendEmail()">Send via Email</button>
+  </div>
 
-  // Enable drawing with mouse
-  function enableSignatureDrawing(canvasId) {
-    const canvas = document.getElementById(canvasId);
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    const canvas = document.getElementById('signature');
     const ctx = canvas.getContext('2d');
     let drawing = false;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-
-    canvas.addEventListener('mousedown', () => drawing = true);
-    canvas.addEventListener('mouseup', () => {
-      drawing = false;
-      ctx.beginPath();
-    });
-    canvas.addEventListener('mousemove', (e) => {
+    canvas.addEventListener('mousedown', () => { drawing = true; });
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', draw);
+    function draw(e) {
       if (!drawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#000';
+      ctx.lineTo(e.offsetX, e.offsetY);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
-  }
-
-  enableSignatureDrawing('userSign');
-  enableSignatureDrawing('witnessSign');
-
-  // Replace canvas with img for accurate PDF capture
-  function replaceCanvasesWithImages() {
-    ['userSign', 'witnessSign'].forEach(id => {
-      const canvas = document.getElementById(id);
-      if (canvas) {
-        const img = document.createElement('img');
-        img.src = canvas.toDataURL();
-        img.style.border = "1px solid #ccc";
-        img.style.width = "100%";
-        img.style.height = "120px";
-        img.style.objectFit = "contain";
-        img.alt = `${id} signature`;
-        canvas.parentNode.replaceChild(img, canvas);
-      }
-    });
-  }
-
-  // Save locally (download)
-  document.getElementById('downloadBtn').addEventListener('click', async () => {
-    replaceCanvasesWithImages();
-
-    const element = document.getElementById('pdf-content');
-    const opt = {
-      margin: 0.5,
-      filename: 'ConsentForm.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, allowTaint: true },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    await html2pdf().set(opt).from(element).save(); // download to user
-  });
-
-  // Upload to backend (e.g. Vercel -> Google Drive)
-  document.getElementById('sendEmailBtn').addEventListener('click', async () => {
-    replaceCanvasesWithImages();
-    const element = document.getElementById('pdf-content');
-
-    const opt = {
-      margin: 0.5,
-      filename: 'ConsentForm.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, allowTaint: true },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-
-    const formData = new FormData();
-    formData.append('pdf', pdfBlob, 'ConsentForm.pdf');
-
-    try {
-      const res = await fetch('/api/sendConsentEmail', {
-        method: 'POST',
-        body: formData
-      });
-      const text = await res.text();
-      alert("✅ Submission successful: " + text);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to submit: " + err.message);
+      ctx.moveTo(e.offsetX, e.offsetY);
     }
-  });
-</script>
 
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById('pdfContent');
+      html2pdf()
+        .set({ margin: 0, filename: 'Consent_Form.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } })
+        .from(element)
+        .save();
+    }
+
+    function sendEmail() {
+      alert('You can wire this up with a backend (e.g., Node.js, PHP, etc.) to email the generated PDF.');
+      // Example: Capture PDF blob and send to backend via fetch()
+    }
+  </script>
 </body>
-
 </html>
