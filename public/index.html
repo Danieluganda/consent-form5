@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
   <meta charset="UTF-8">
   <title>10X Consent Form</title>
   <style>
@@ -128,7 +131,7 @@
           <img src="assets/logos/uncdf_logo.png" alt="Left Logo" class="logo" />
           <img src="assets/logos/foundation_logo.png" alt="Right Logo" class="logo" />
       </div>
-      <h1>10X: Enabling Growth of MSMEs Through the Digital Economy</h1>
+      <h1>10X: Enabling Growth of MSMEs Through the Digital Economy</h1> <h3>V2</h3>
       <h2>Consent to Collection, Processing and Transfer of Personal Data</h2>
     </div>
 
@@ -332,73 +335,14 @@
 
 
 
-
-
 </div>
 
 
   </div>
+  
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-  function clearSignature(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function setupSignaturePad(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext("2d");
-    let drawing = false;
-
-    canvas.addEventListener("mousedown", () => drawing = true);
-    canvas.addEventListener("mouseup", () => {
-      drawing = false;
-      ctx.beginPath();
-    });
-    canvas.addEventListener("mouseout", () => drawing = false);
-    canvas.addEventListener("mousemove", draw);
-
-    canvas.addEventListener("touchstart", () => drawing = true);
-    canvas.addEventListener("touchend", () => {
-      drawing = false;
-      ctx.beginPath();
-    });
-    canvas.addEventListener("touchcancel", () => drawing = false);
-    canvas.addEventListener("touchmove", drawTouch);
-
-    function draw(e) {
-      if (!drawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#000";
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    }
-
-    function drawTouch(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#000";
-      ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-    }
-  }
-
-  function getSignatureDataURL(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    return canvas.toDataURL("image/png");
-  }
-
-  function submitConsentForm() {
+  async function submitConsentForm() {
     const participantName = document.getElementById('participantName').value.trim();
     const participantDate = document.getElementById('participantDate').value;
     const witnessName = document.getElementById('witnessName').value.trim();
@@ -407,32 +351,61 @@
     const participantSignature = getSignatureDataURL('participantSignature');
     const witnessSignature = getSignatureDataURL('witnessSignature');
 
-    // TODO: Send or generate PDF with this data
-    const formData = {
-      participantName,
-      participantDate,
-      participantSignature,
-      witnessName,
-      witnessDate,
-      witnessSignature
-    };
+    if (!participantName || !participantDate || !witnessName || !witnessDate) {
+      alert("⚠️ Please fill in all fields and sign before submitting.");
+      return;
+    }
 
-    console.log("📝 Consent Form Data:", formData);
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
 
-    alert("Consent form captured successfully. Ready for PDF generation.");
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontSize = 12;
 
-    // You can now pass `formData` to your PDF generator or API call
-    // Example: generatePdf(formData) or sendToBackend(formData)
+    // Draw text
+    page.drawText(`Participant Name: ${participantName}`, { x: 50, y: 750, size: fontSize, font });
+    page.drawText(`Date: ${participantDate}`, { x: 50, y: 730, size: fontSize, font });
+    page.drawText(`Witness Name: ${witnessName}`, { x: 50, y: 710, size: fontSize, font });
+    page.drawText(`Date: ${witnessDate}`, { x: 50, y: 690, size: fontSize, font });
+
+    // Draw signatures
+    const sig1 = await pdfDoc.embedPng(participantSignature);
+    const sig2 = await pdfDoc.embedPng(witnessSignature);
+
+    page.drawText("Participant Signature:", { x: 50, y: 660, size: fontSize, font });
+    page.drawImage(sig1, { x: 50, y: 610, width: 150, height: 50 });
+
+    page.drawText("Witness Signature:", { x: 50, y: 570, size: fontSize, font });
+    page.drawImage(sig2, { x: 50, y: 520, width: 150, height: 50 });
+
+    // Convert PDF to base64
+    const pdfBytes = await pdfDoc.save();
+    const base64 = btoa(String.fromCharCode(...pdfBytes));
+    const filename = `Consent_Form_${participantName.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
+
+    // Upload to Google Apps Script endpoint
+    try {
+      const response = await fetch("YOUR_GAS_WEB_APP_URL", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          fileBase64: base64,
+          filename: filename,
+        }),
+      });
+
+      const text = await response.text();
+      console.log("✅ Upload Response:", text);
+      alert("✅ Consent form uploaded successfully.");
+    } catch (error) {
+      console.error("❌ Upload failed:", error);
+      alert("❌ Failed to upload the consent form.");
+    }
   }
-
-  // Initialize on load
-  window.onload = function () {
-    setupSignaturePad('participantSignature');
-    setupSignaturePad('witnessSignature');
-  };
 </script>
-
-
 
 </body>
 </html>

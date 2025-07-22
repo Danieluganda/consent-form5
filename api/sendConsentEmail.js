@@ -10,6 +10,7 @@ export const config = {
   },
 };
 
+// 🪵 Simple logging function to log into log.txt
 const logToFile = (message) => {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}\n`;
@@ -19,7 +20,7 @@ const logToFile = (message) => {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    const msg = "❌ Method Not Allowed";
+    const msg = '❌ Method Not Allowed';
     logToFile(msg);
     return res.status(405).send(msg);
   }
@@ -31,37 +32,42 @@ export default async function handler(req, res) {
       const msg = `❌ Form parsing error: ${err.message}`;
       console.error(msg);
       logToFile(msg);
-      return res.status(500).send("Form parsing failed");
+      return res.status(500).send('Form parsing failed');
     }
 
     const file = files.pdf;
+
     if (!file) {
-      const msg = "❌ No PDF file uploaded";
+      const msg = '❌ No PDF file uploaded';
       logToFile(msg);
       return res.status(400).send(msg);
     }
 
+    // 📤 Prepare form data to send to Google Apps Script
     const driveForm = new FormData();
     driveForm.append('file', fs.createReadStream(file.filepath));
     driveForm.append('filename', file.originalFilename || 'ConsentForm.pdf');
 
-    logToFile(`📄 File ready: ${file.originalFilename}, Path: ${file.filepath}`);
+    logToFile(`📄 File ready: ${file.originalFilename} | Path: ${file.filepath}`);
 
     try {
-      const driveRes = await fetch('https://script.google.com/macros/s/AKfycbzaXScfliiZSZxh0h_co_i4fCjYW7rmvTBdfYYygFz0F2KL8QXCEJC6GKak_vSpWte1bA/exec', {
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbzaXScfliiZSZxh0h_co_i4fCjYW7rmvTBdfYYygFz0F2KL8QXCEJC6GKak_vSpWte1bA/exec';
+
+      const driveRes = await fetch(scriptURL, {
         method: 'POST',
         body: driveForm,
       });
 
       const text = await driveRes.text();
       logToFile(`✅ Drive response: ${text}`);
-      console.log("✅ Drive response:", text);
-      return res.status(200).send("✅ Consent form sent to Drive.");
+      console.log('✅ Drive response:', text);
+
+      return res.status(200).send('✅ Consent form sent to Drive.');
     } catch (err) {
       const errorMsg = `❌ Error uploading to Drive: ${err.message}`;
       console.error(errorMsg);
       logToFile(errorMsg);
-      return res.status(500).send("Drive upload failed.");
+      return res.status(500).send('Drive upload failed.');
     }
   });
 }
